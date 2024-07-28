@@ -1,4 +1,4 @@
-import { FoodLogWithFood } from "../queries";
+import { type FoodLogWithFood } from "../queries";
 
 export type NutrientsOverview = {
   protein: number;

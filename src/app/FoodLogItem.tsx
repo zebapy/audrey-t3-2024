@@ -5,7 +5,7 @@ import {
   Trash,
   TrashSimple,
 } from "@phosphor-icons/react/dist/ssr";
-import { DayFoodLog } from "./queries";
+import { type DayFoodLog } from "./queries";
 import { deleteFoodLog } from "./actions";
 import Link from "next/link";
 import { FoodLogItemEditor } from "./FoodLogItemEditor";

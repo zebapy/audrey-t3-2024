@@ -1,7 +1,7 @@
-import { $Enums } from "@prisma/client";
+import { type $Enums } from "@prisma/client";
 import { getServerAuthSession } from "~/server/auth";
 import { HydrateClient } from "~/trpc/server";
-import { DayFoodLog, getFoodLogsByDays } from "./queries";
+import { type DayFoodLog, getFoodLogsByDays } from "./queries";
 import Link from "next/link";
 import { FoodLogItemEditor } from "./FoodLogItemEditor";
 import { sumNutrientsForFoods } from "./utils/calculateNutrients";
