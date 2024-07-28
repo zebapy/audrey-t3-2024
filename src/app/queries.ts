@@ -1,22 +1,30 @@
-import { type Prisma, FoodLog } from "@prisma/client";
+import { type Prisma } from "@prisma/client";
 import { db } from "~/server/db";
-import {
-  calculateNutrients,
-  NutrientsOverview,
-} from "./utils/calculateNutrients";
 
 export type SearchParams = {
   term?: string;
+  code?: string;
 };
 
 export function searchFood(query: SearchParams) {
+  const term = query.term?.trim();
+  const code = query.code?.trim();
+
+  const where: Prisma.openfoodfactsWhereInput = {};
+
+  if (term) {
+    where.product_name = {
+      contains: term,
+      mode: "insensitive",
+    };
+  }
+
+  if (code) {
+    where.code = parseInt(code);
+  }
+
   return db.openfoodfacts.findMany({
-    where: {
-      product_name: {
-        contains: query.term?.trim(),
-        mode: "insensitive",
-      },
-    },
+    where,
     select: {
       id: true,
       generic_name: true,
