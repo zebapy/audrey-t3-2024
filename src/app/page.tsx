@@ -75,7 +75,18 @@ const DayOverview = ({
   );
 };
 
-const DayItems = ({ foods }: { foods: DayFoodLog["foods"] }) => {
+const FoodLogItem = ({ food }: { food: DayFoodLog["foods"][0] }) => {
+  return (
+    <div>
+      <h4 className="font-medium">{food.food.product_name}</h4>
+      <p className="text-sm text-gray-500">
+        {food.servings} {food.unit}
+      </p>
+    </div>
+  );
+};
+
+const GroupedFoodItems = ({ foods }: { foods: DayFoodLog["foods"] }) => {
   const grouped = foods.reduce(
     (acc, food) => {
       acc[food.group] ??= [];
@@ -98,10 +109,7 @@ const DayItems = ({ foods }: { foods: DayFoodLog["foods"] }) => {
           <ul className="rounded bg-white">
             {foods.map((food) => (
               <li key={food.id} className="border-b p-2 last:border-0">
-                <h4 className="font-medium">{food.food.product_name}</h4>
-                <p className="text-sm text-gray-500">
-                  {food.servings} {food.unit}
-                </p>
+                <FoodLogItem food={food} />
               </li>
             ))}
           </ul>
@@ -130,7 +138,7 @@ const FoodLog = async () => {
           <li key={daylog.date.toString()}>
             <DayOverview date={daylog.date} foods={daylog.foods} />
             <div className="my-4"></div>
-            <DayItems foods={daylog.foods} />
+            <GroupedFoodItems foods={daylog.foods} />
           </li>
         ))}
       </ol>
