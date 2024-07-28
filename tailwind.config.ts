@@ -17,6 +17,7 @@ export default {
     },
   },
   plugins: [
+    require("@tailwindcss/forms"),
     plugin(function ({ addVariant }) {
       addVariant("progress-unfilled", ["&::-webkit-progress-bar", "&"]);
       addVariant("progress-filled", [

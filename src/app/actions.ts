@@ -1,7 +1,9 @@
 "use server";
 
-import { type $Enums } from "@prisma/client";
+import { $Enums } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { z } from "zod";
 import { db } from "~/server/db";
 
 export const addFoodLog = async (input: {
@@ -9,9 +11,7 @@ export const addFoodLog = async (input: {
   servings: number;
   unit: $Enums.ServingUnit;
 }) => {
-  console.log("add food", input);
-
-  await db.foodLog.create({
+  const log = await db.foodLog.create({
     data: {
       foodId: input.foodId,
       servings: input.servings,
@@ -20,5 +20,37 @@ export const addFoodLog = async (input: {
     },
   });
 
-  revalidatePath("/");
+  redirect(`/?edit=${log.id}#${log.id}`);
+};
+
+type UpdateFoodLogState = {
+  message?: string;
+};
+
+const updateFoodLogInput = z.object({
+  id: z.string(),
+  servings: z.string(),
+  unit: z.nativeEnum($Enums.ServingUnit),
+});
+
+export const updateFoodLog = async (prev: UpdateFoodLogState, fd: FormData) => {
+  const input = updateFoodLogInput.safeParse(Object.fromEntries(fd.entries()));
+
+  if (!input.success) {
+    return { message: JSON.stringify(input.error) };
+  }
+
+  const data = input.data;
+
+  await db.foodLog.update({
+    where: { id: data.id },
+    data: {
+      servings: parseFloat(data.servings),
+      unit: data.unit,
+    },
+  });
+
+  redirect("/");
+
+  return { message: "Updated" };
 };

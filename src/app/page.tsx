@@ -1,7 +1,10 @@
 import { $Enums } from "@prisma/client";
 import { getServerAuthSession } from "~/server/auth";
 import { HydrateClient } from "~/trpc/server";
-import { DayFoodLog, getFoodLogsByDays, sumNutrientsForFoods } from "./queries";
+import { DayFoodLog, getFoodLogsByDays } from "./queries";
+import Link from "next/link";
+import { FoodLogItemEditor } from "./FoodLogItemEditor";
+import { sumNutrientsForFoods } from "./utils/calculateNutrients";
 
 const shortDate = (date: Date) =>
   date.toLocaleDateString("en-US", {
@@ -75,18 +78,26 @@ const DayOverview = ({
   );
 };
 
-const FoodLogItem = ({ food }: { food: DayFoodLog["foods"][0] }) => {
+const FoodLogItem = ({ log }: { log: DayFoodLog["foods"][0] }) => {
   return (
-    <div>
-      <h4 className="font-medium">{food.food.product_name}</h4>
-      <p className="text-sm text-gray-500">
-        {food.servings} {food.unit}
-      </p>
-    </div>
+    <Link href={`/?edit=${log.id}`}>
+      <div className="p-2">
+        <h4 className="font-medium">{log.food.product_name}</h4>
+        <p className="text-sm text-gray-500">
+          {log.servings} {log.unit}
+        </p>
+      </div>
+    </Link>
   );
 };
 
-const GroupedFoodItems = ({ foods }: { foods: DayFoodLog["foods"] }) => {
+const GroupedFoodItems = ({
+  foods,
+  editId,
+}: {
+  foods: DayFoodLog["foods"];
+  editId?: string;
+}) => {
   const grouped = foods.reduce(
     (acc, food) => {
       acc[food.group] ??= [];
@@ -98,18 +109,22 @@ const GroupedFoodItems = ({ foods }: { foods: DayFoodLog["foods"] }) => {
 
   return (
     <ol className="divide-y-4">
-      {Object.entries(grouped).map(([group, foods]) => (
+      {Object.entries(grouped).map(([group, foodLogs]) => (
         <li key={group}>
           <div className="border-b-2 border-gray-300 bg-white p-2 text-gray-800">
             <h4 className="mb-2 text-sm font-semibold">{group}</h4>
             <div className="text-xs">
-              <NutrientBar logs={foods} />
+              <NutrientBar logs={foodLogs} />
             </div>
           </div>
           <ul className="rounded bg-white">
-            {foods.map((food) => (
-              <li key={food.id} className="border-b p-2 last:border-0">
-                <FoodLogItem food={food} />
+            {foodLogs.map((food) => (
+              <li key={food.id} className="border-b last:border-0">
+                {editId === food.id ? (
+                  <FoodLogItemEditor log={food} />
+                ) : (
+                  <FoodLogItem log={food} />
+                )}
               </li>
             ))}
           </ul>
@@ -119,7 +134,7 @@ const GroupedFoodItems = ({ foods }: { foods: DayFoodLog["foods"] }) => {
   );
 };
 
-const FoodLog = async () => {
+const FoodLog = async ({ editId }: { editId?: string }) => {
   const daysAgo = 3;
   const startDate = new Date(
     new Date().setDate(new Date().getDate() - daysAgo),
@@ -138,7 +153,7 @@ const FoodLog = async () => {
           <li key={daylog.date.toString()}>
             <DayOverview date={daylog.date} foods={daylog.foods} />
             <div className="my-4"></div>
-            <GroupedFoodItems foods={daylog.foods} />
+            <GroupedFoodItems foods={daylog.foods} editId={editId} />
           </li>
         ))}
       </ol>
@@ -146,12 +161,16 @@ const FoodLog = async () => {
   );
 };
 
-export default async function Home() {
-  const session = await getServerAuthSession();
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { edit?: string };
+}) {
+  // const session = await getServerAuthSession();
   return (
     <HydrateClient>
       <div>
-        <FoodLog />
+        <FoodLog editId={searchParams.edit} />
       </div>
     </HydrateClient>
   );

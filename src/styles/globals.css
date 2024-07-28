@@ -5,10 +5,11 @@ body {
 }
 
 .btn {
-  background-color: theme("colors.purple.400");
-  color: white;
-  padding-block: 0.5rem;
-  padding-inline: 1rem;
+  @apply rounded bg-purple-700 px-2 py-1 text-center font-semibold text-white disabled:opacity-50;
+}
+
+.btn-alt {
+  @apply rounded bg-gray-200 px-2 py-1 text-center font-semibold text-gray-800 disabled:opacity-50;
 }
 
 @tailwind components;

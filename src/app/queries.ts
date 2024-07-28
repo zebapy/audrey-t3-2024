@@ -1,5 +1,9 @@
 import { type Prisma, FoodLog } from "@prisma/client";
 import { db } from "~/server/db";
+import {
+  calculateNutrients,
+  NutrientsOverview,
+} from "./utils/calculateNutrients";
 
 export type SearchParams = {
   term?: string;
@@ -27,13 +31,6 @@ export function searchFood(query: SearchParams) {
 }
 
 export type FoodResult = Prisma.PromiseReturnType<typeof searchFood>[number];
-
-type NutrientsOverview = {
-  protein: number;
-  fat: number;
-  carbs: number;
-  kcals: number;
-};
 
 const getFoodLogs = async ({
   startDate,
@@ -77,45 +74,6 @@ const getFoodLogs = async ({
 export type FoodLogWithFood = Prisma.PromiseReturnType<
   typeof getFoodLogs
 >[number];
-
-/**
- * Given a food log and its food, calculate the nutrients
- * based on the servings and the food's nutrients per 100g.
- */
-export const calculateNutrients = (log: FoodLogWithFood): NutrientsOverview => {
-  if (log.unit === "GRAM") {
-    const servingUnit = log.servings / 100;
-    return {
-      carbs: Math.ceil((log.food.carbohydrates_100g ?? 0) * servingUnit),
-      protein: Math.ceil((log.food.proteins_100g ?? 0) * servingUnit),
-      fat: Math.ceil((log.food.fat_100g ?? 0) * servingUnit),
-      kcals: Math.ceil((log.food.energy_kcal_100g ?? 0) * servingUnit),
-    };
-  }
-
-  throw new Error("only grams are supported");
-};
-
-export const sumNutrientsForFoods = (
-  foods: FoodLogWithFood[],
-): NutrientsOverview => {
-  return foods.reduce(
-    (acc, food) => {
-      const nutrients = calculateNutrients(food);
-      acc.carbs += nutrients.carbs;
-      acc.protein += nutrients.protein;
-      acc.fat += nutrients.fat;
-      acc.kcals += nutrients.kcals;
-      return acc;
-    },
-    {
-      carbs: 0,
-      protein: 0,
-      fat: 0,
-      kcals: 0,
-    },
-  );
-};
 
 export type DayFoodLog = {
   date: Date;
