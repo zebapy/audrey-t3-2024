@@ -19,40 +19,35 @@ export const FoodLogItemEditor = ({ log }: { log: DayFoodLog["foods"][0] }) => {
   // const sums = calculateNutrients();
 
   return (
-    <div className="p-2 ring-2 ring-purple-500" id={log.id}>
-      <h3 className="font-semibold">{log.food.product_name}</h3>
-
-      <form action={action}>
-        <input type="hidden" name="id" value={log.id} />
-        <input
-          type="number"
-          name="servings"
-          defaultValue={log.servings}
-          onChange={(e) => setServings(parseInt(e.target.value, 10))}
-          required
-        />
-        <select
-          name="unit"
-          defaultValue={log.unit}
-          onChange={(e) => setUnit(e.target.value as $Enums.ServingUnit)}
-          required
-        >
-          {Object.entries($Enums.ServingUnit).map(([key, value]) => (
-            <option key={key} value={value}>
-              {key}
-            </option>
-          ))}
-        </select>
-        <div>{state.message}</div>
-        <div className="flex gap-2 pt-2 [&>*]:flex-1">
-          <Link href="/" className="btn-alt">
-            Cancel
-          </Link>
-          <PendingSubmitButton loadingText="Saving...">
-            Save
-          </PendingSubmitButton>
-        </div>
-      </form>
-    </div>
+    <form action={action}>
+      <input type="hidden" name="id" value={log.id} />
+      <input
+        type="number"
+        name="servings"
+        defaultValue={log.servings}
+        onChange={(e) => setServings(parseInt(e.target.value, 10))}
+        autoFocus
+        required
+      />
+      <select
+        name="unit"
+        defaultValue={log.unit}
+        onChange={(e) => setUnit(e.target.value as $Enums.ServingUnit)}
+        required
+      >
+        {Object.entries($Enums.ServingUnit).map(([key, value]) => (
+          <option key={key} value={value}>
+            {key}
+          </option>
+        ))}
+      </select>
+      <div>{state.message}</div>
+      <div className="flex gap-2 pt-2 [&>*]:flex-1">
+        <Link href="/" className="btn-alt">
+          Cancel
+        </Link>
+        <PendingSubmitButton loadingText="Saving...">Save</PendingSubmitButton>
+      </div>
+    </form>
   );
 };

@@ -20,7 +20,7 @@ export const addFoodLog = async (input: {
     },
   });
 
-  redirect(`/?edit=${log.id}#${log.id}`);
+  redirect(`/?edit=${log.id}#food-${log.id}`);
 };
 
 type UpdateFoodLogState = {

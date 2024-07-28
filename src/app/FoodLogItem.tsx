@@ -7,6 +7,8 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { DayFoodLog } from "./queries";
 import { deleteFoodLog } from "./actions";
+import Link from "next/link";
+import { FoodLogItemEditor } from "./FoodLogItemEditor";
 
 const DeleteFoodLogButton = ({ id }: { id: string }) => {
   return (
@@ -29,12 +31,19 @@ export const FoodLogItem = ({
   editing: boolean;
 }) => {
   return (
-    <div className="group flex justify-between p-2">
+    <div className="group flex justify-between p-2" id={`food-${log.id}`}>
       <div className="">
         <h4 className="font-medium">{log.food.product_name}</h4>
-        <button className="flex gap-2 text-sm text-gray-500">
-          {log.servings} {log.unit} <PencilSimple />
-        </button>
+        {editing ? (
+          <FoodLogItemEditor log={log} />
+        ) : (
+          <Link
+            href={`/?edit=${log.id}`}
+            className="flex gap-2 text-sm text-gray-500"
+          >
+            {log.servings} {log.unit} <PencilSimple />
+          </Link>
+        )}
       </div>
       <div className="invisible group-focus-within:visible group-hover:visible">
         <DeleteFoodLogButton id={log.id} />
