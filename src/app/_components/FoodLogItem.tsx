@@ -31,23 +31,25 @@ export const FoodLogItem = ({
   editing: boolean;
 }) => {
   return (
-    <div className="group flex justify-between p-2" id={`food-${log.id}`}>
-      <div className="">
-        <h4 className="font-medium">{log.food.product_name}</h4>
-        {editing ? (
-          <FoodLogItemEditor log={log} />
-        ) : (
-          <Link
-            href={`/?edit=${log.id}`}
-            className="flex gap-2 text-sm text-gray-500"
-          >
-            {log.servings} {log.unit} <PencilSimple />
-          </Link>
-        )}
+    <div className="group p-2" id={`food-${log.id}`}>
+      <div className="flex justify-between">
+        <div>
+          <h4 className="font-medium">{log.food.product_name}</h4>
+          {editing ? null : (
+            <Link
+              href={`/?edit=${log.id}`}
+              className="flex gap-2 text-sm text-gray-500"
+            >
+              {log.servings} {log.unit} <PencilSimple />
+            </Link>
+          )}
+        </div>
+        <div className="invisible group-focus-within:visible group-hover:visible">
+          <DeleteFoodLogButton id={log.id} />
+        </div>
       </div>
-      <div className="invisible group-focus-within:visible group-hover:visible">
-        <DeleteFoodLogButton id={log.id} />
-      </div>
+
+      {editing && <FoodLogItemEditor log={log} />}
     </div>
   );
 };
