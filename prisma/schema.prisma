@@ -1,74 +1,240 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
+enum ServingUnit {
+  GRAM
+  MILLILITER
+  CUP
+  TABLESPOON
+  TEASPOON
+  PIECE
 }
 
-// Necessary for Next auth
-model Account {
-    id                       String  @id @default(cuid())
-    userId                   String
-    type                     String
-    provider                 String
-    providerAccountId        String
-    refresh_token            String? // @db.Text
-    access_token             String? // @db.Text
-    expires_at               Int?
-    token_type               String?
-    scope                    String?
-    id_token                 String? // @db.Text
-    session_state            String?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    refresh_token_expires_in Int?
-
-    @@unique([provider, providerAccountId])
+model FoodLog {
+  id        String        @id @default(uuid())
+  foodId    String
+  userId    String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  servings  Float
+  unit      ServingUnit
+  food      openfoodfacts @relation(fields: [foodId], references: [id])
 }
 
-model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
-}
-
-model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
-
-    @@unique([identifier, token])
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model openfoodfacts {
+  code                                                  BigInt
+  url                                                   String
+  creator                                               String
+  created_t                                             Float
+  created_datetime                                      String?
+  last_modified_t                                       Float
+  last_modified_datetime                                String?
+  last_modified_by                                      String?
+  last_updated_t                                        Float?
+  last_updated_datetime                                 String?
+  product_name                                          String?
+  abbreviated_product_name                              String?
+  generic_name                                          String?
+  quantity                                              String?
+  packaging                                             String?
+  packaging_tags                                        String?
+  packaging_en                                          String?
+  packaging_text                                        String?
+  brands                                                String?
+  brands_tags                                           String?
+  categories                                            String?
+  categories_tags                                       String?
+  categories_en                                         String?
+  origins                                               String?
+  origins_tags                                          String?
+  origins_en                                            String?
+  manufacturing_places                                  String?
+  manufacturing_places_tags                             String?
+  labels                                                String?
+  labels_tags                                           String?
+  labels_en                                             String?
+  emb_codes                                             String?
+  emb_codes_tags                                        String?
+  first_packaging_code_geo                              String?
+  cities                                                String?
+  cities_tags                                           String?
+  purchase_places                                       String?
+  stores                                                String?
+  countries                                             String?
+  countries_tags                                        String?
+  countries_en                                          String?
+  ingredients_text                                      String?
+  ingredients_tags                                      String?
+  ingredients_analysis_tags                             String?
+  allergens                                             String?
+  allergens_en                                          String?
+  traces                                                String?
+  traces_tags                                           String?
+  traces_en                                             String?
+  serving_size                                          String?
+  serving_quantity                                      Float?
+  no_nutrition_data                                     String?
+  additives_n                                           Float?
+  additives                                             String?
+  additives_tags                                        String?
+  additives_en                                          String?
+  nutriscore_score                                      Float?
+  nutriscore_grade                                      String?
+  nova_group                                            Float?
+  pnns_groups_1                                         String?
+  pnns_groups_2                                         String?
+  food_groups                                           String?
+  food_groups_tags                                      String?
+  food_groups_en                                        String?
+  states                                                String
+  states_tags                                           String
+  states_en                                             String
+  brand_owner                                           String?
+  ecoscore_score                                        Float?
+  ecoscore_grade                                        String?
+  nutrient_levels_tags                                  String?
+  product_quantity                                      Float?
+  owner                                                 String?
+  data_quality_errors_tags                              String?
+  unique_scans_n                                        Float?
+  popularity_tags                                       String?
+  completeness                                          Float
+  last_image_t                                          Float?
+  last_image_datetime                                   String?
+  main_category                                         String?
+  main_category_en                                      String?
+  image_url                                             String?
+  image_small_url                                       String?
+  image_ingredients_url                                 String?
+  image_ingredients_small_url                           String?
+  image_nutrition_url                                   String?
+  image_nutrition_small_url                             String?
+  energy_kj_100g                                        Float?    @map("energy-kj_100g")
+  energy_kcal_100g                                      Float?    @map("energy-kcal_100g")
+  energy_100g                                           Float?
+  energy_from_fat_100g                                  Float?    @map("energy-from-fat_100g")
+  fat_100g                                              Float?
+  saturated_fat_100g                                    Float?    @map("saturated-fat_100g")
+  butyric_acid_100g                                     Float?    @map("butyric-acid_100g")
+  caproic_acid_100g                                     Float?    @map("caproic-acid_100g")
+  caprylic_acid_100g                                    Float?    @map("caprylic-acid_100g")
+  capric_acid_100g                                      Float?    @map("capric-acid_100g")
+  lauric_acid_100g                                      Float?    @map("lauric-acid_100g")
+  myristic_acid_100g                                    Float?    @map("myristic-acid_100g")
+  palmitic_acid_100g                                    Float?    @map("palmitic-acid_100g")
+  stearic_acid_100g                                     Float?    @map("stearic-acid_100g")
+  arachidic_acid_100g                                   Float?    @map("arachidic-acid_100g")
+  behenic_acid_100g                                     Float?    @map("behenic-acid_100g")
+  lignoceric_acid_100g                                  Float?    @map("lignoceric-acid_100g")
+  cerotic_acid_100g                                     Float?    @map("cerotic-acid_100g")
+  montanic_acid_100g                                    Float?    @map("montanic-acid_100g")
+  melissic_acid_100g                                    Float?    @map("melissic-acid_100g")
+  unsaturated_fat_100g                                  Float?    @map("unsaturated-fat_100g")
+  monounsaturated_fat_100g                              Float?    @map("monounsaturated-fat_100g")
+  omega_9_fat_100g                                      Float?    @map("omega-9-fat_100g")
+  polyunsaturated_fat_100g                              Float?    @map("polyunsaturated-fat_100g")
+  omega_3_fat_100g                                      Float?    @map("omega-3-fat_100g")
+  omega_6_fat_100g                                      Float?    @map("omega-6-fat_100g")
+  alpha_linolenic_acid_100g                             Float?    @map("alpha-linolenic-acid_100g")
+  eicosapentaenoic_acid_100g                            Float?    @map("eicosapentaenoic-acid_100g")
+  docosahexaenoic_acid_100g                             Float?    @map("docosahexaenoic-acid_100g")
+  linoleic_acid_100g                                    Float?    @map("linoleic-acid_100g")
+  arachidonic_acid_100g                                 Float?    @map("arachidonic-acid_100g")
+  gamma_linolenic_acid_100g                             Float?    @map("gamma-linolenic-acid_100g")
+  dihomo_gamma_linolenic_acid_100g                      Float?    @map("dihomo-gamma-linolenic-acid_100g")
+  oleic_acid_100g                                       Float?    @map("oleic-acid_100g")
+  elaidic_acid_100g                                     Float?    @map("elaidic-acid_100g")
+  gondoic_acid_100g                                     Float?    @map("gondoic-acid_100g")
+  mead_acid_100g                                        Float?    @map("mead-acid_100g")
+  erucic_acid_100g                                      Float?    @map("erucic-acid_100g")
+  nervonic_acid_100g                                    Float?    @map("nervonic-acid_100g")
+  trans_fat_100g                                        Float?    @map("trans-fat_100g")
+  cholesterol_100g                                      Float?
+  carbohydrates_100g                                    Float?
+  sugars_100g                                           Float?
+  added_sugars_100g                                     Float?    @map("added-sugars_100g")
+  sucrose_100g                                          Float?
+  glucose_100g                                          Float?
+  fructose_100g                                         Float?
+  lactose_100g                                          Float?
+  maltose_100g                                          Float?
+  maltodextrins_100g                                    Float?
+  starch_100g                                           Float?
+  polyols_100g                                          Float?
+  erythritol_100g                                       Float?
+  fiber_100g                                            Float?
+  soluble_fiber_100g                                    Float?    @map("soluble-fiber_100g")
+  insoluble_fiber_100g                                  Float?    @map("insoluble-fiber_100g")
+  proteins_100g                                         Float?
+  casein_100g                                           Float?
+  serum_proteins_100g                                   Float?    @map("serum-proteins_100g")
+  nucleotides_100g                                      Float?
+  salt_100g                                             Float?
+  added_salt_100g                                       Float?    @map("added-salt_100g")
+  sodium_100g                                           Float?
+  alcohol_100g                                          Float?
+  vitamin_a_100g                                        Float?    @map("vitamin-a_100g")
+  beta_carotene_100g                                    Float?    @map("beta-carotene_100g")
+  vitamin_d_100g                                        Float?    @map("vitamin-d_100g")
+  vitamin_e_100g                                        Float?    @map("vitamin-e_100g")
+  vitamin_k_100g                                        Float?    @map("vitamin-k_100g")
+  vitamin_c_100g                                        Float?    @map("vitamin-c_100g")
+  vitamin_b1_100g                                       Float?    @map("vitamin-b1_100g")
+  vitamin_b2_100g                                       Float?    @map("vitamin-b2_100g")
+  vitamin_pp_100g                                       Float?    @map("vitamin-pp_100g")
+  vitamin_b6_100g                                       Float?    @map("vitamin-b6_100g")
+  vitamin_b9_100g                                       Float?    @map("vitamin-b9_100g")
+  folates_100g                                          Float?
+  vitamin_b12_100g                                      Float?    @map("vitamin-b12_100g")
+  biotin_100g                                           Float?
+  pantothenic_acid_100g                                 Float?    @map("pantothenic-acid_100g")
+  silica_100g                                           Float?
+  bicarbonate_100g                                      Float?
+  potassium_100g                                        Float?
+  chloride_100g                                         Float?
+  calcium_100g                                          Float?
+  phosphorus_100g                                       Float?
+  iron_100g                                             Float?
+  magnesium_100g                                        Float?
+  zinc_100g                                             Float?
+  copper_100g                                           Float?
+  manganese_100g                                        Float?
+  fluoride_100g                                         Float?
+  selenium_100g                                         Float?
+  chromium_100g                                         Float?
+  molybdenum_100g                                       Float?
+  iodine_100g                                           Float?
+  caffeine_100g                                         Float?
+  taurine_100g                                          Float?
+  ph_100g                                               Float?
+  fruits_vegetables_nuts_100g                           Float?    @map("fruits-vegetables-nuts_100g")
+  fruits_vegetables_nuts_dried_100g                     Float?    @map("fruits-vegetables-nuts-dried_100g")
+  fruits_vegetables_nuts_estimate_100g                  Float?    @map("fruits-vegetables-nuts-estimate_100g")
+  fruits_vegetables_nuts_estimate_from_ingredients_100g Float?    @map("fruits-vegetables-nuts-estimate-from-ingredients_100g")
+  collagen_meat_protein_ratio_100g                      Float?    @map("collagen-meat-protein-ratio_100g")
+  cocoa_100g                                            Float?
+  chlorophyl_100g                                       Float?
+  carbon_footprint_100g                                 Float?    @map("carbon-footprint_100g")
+  carbon_footprint_from_meat_or_fish_100g               Float?    @map("carbon-footprint-from-meat-or-fish_100g")
+  nutrition_score_fr_100g                               Float?    @map("nutrition-score-fr_100g")
+  nutrition_score_uk_100g                               Float?    @map("nutrition-score-uk_100g")
+  glycemic_index_100g                                   Float?    @map("glycemic-index_100g")
+  water_hardness_100g                                   Float?    @map("water-hardness_100g")
+  choline_100g                                          Float?
+  phylloquinone_100g                                    Float?
+  beta_glucan_100g                                      Float?    @map("beta-glucan_100g")
+  inositol_100g                                         Float?
+  carnitine_100g                                        Float?
+  sulphate_100g                                         Float?
+  nitrate_100g                                          Float?
+  acidity_100g                                          Float?
+  id                                                    String    @id @default(uuid())
+  FoodLog                                               FoodLog[]
 }

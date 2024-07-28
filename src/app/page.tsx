@@ -3,65 +3,91 @@ import Link from "next/link";
 import { LatestPost } from "~/app/_components/post";
 import { getServerAuthSession } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
+import { getFoodLogs } from "./queries";
 
-export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
-  const session = await getServerAuthSession();
+const DayOverview = ({
+  eaten,
+  goal = 2000,
+}: {
+  eaten: number;
+  goal?: number;
+}) => {
+  const left = goal - eaten;
 
-  void api.post.getLatest.prefetch();
+  const progress = eaten / goal;
+  const isOver = progress > 1;
 
   return (
+    <div className="rounded bg-white p-4">
+      <div className="flex justify-between">
+        <h3 className="text-sm font-medium">Today - Weds, June 20</h3>
+        <small className="text-xs">{goal} calories</small>
+      </div>
+      <progress
+        value={progress}
+        className="progress-unfilled:bg-gray-100 progress-filled:bg-green-400 data-[over=true]:progress-filled:bg-red-400 h-2 w-full"
+        data-over={isOver}
+      />
+      <p className="flex justify-between font-medium">
+        <span>{eaten} eaten</span>
+        {isOver ? <span>{Math.abs(left)} over</span> : <span>{left} left</span>}
+      </p>
+      <div className="flex justify-between text-xs text-gray-500">
+        <ul className="flex gap-2">
+          <li>40g protein</li>
+          <li>20g fat</li>
+          <li>20g carbs</li>
+        </ul>
+        <span>300 burned</span>
+      </div>
+    </div>
+  );
+};
+
+const DayItems = () => {
+  return (
+    <ol>
+      <li>Chicken</li>
+    </ol>
+  );
+};
+
+const DayLog = ({ eaten }: { eaten: number }) => {
+  return (
+    <div>
+      <DayOverview eaten={eaten} />
+      <DayItems />
+    </div>
+  );
+};
+
+const FoodLog = async () => {
+  const logs = await getFoodLogs();
+
+  return (
+    <div className="container">
+      <ol className="grid grid-cols-3 gap-4">
+        <li>
+          <DayLog eaten={100} />
+        </li>
+        <li>
+          <DayLog eaten={1000} />
+        </li>
+        <li>
+          <DayLog eaten={2300} />
+        </li>
+      </ol>
+    </div>
+  );
+};
+
+export default async function Home() {
+  const session = await getServerAuthSession();
+  return (
     <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p>
-
-            <div className="flex flex-col items-center justify-center gap-4">
-              <p className="text-center text-2xl text-white">
-                {session && <span>Logged in as {session.user?.name}</span>}
-              </p>
-              <Link
-                href={session ? "/api/auth/signout" : "/api/auth/signin"}
-                className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
-              >
-                {session ? "Sign out" : "Sign in"}
-              </Link>
-            </div>
-          </div>
-
-          {session?.user && <LatestPost />}
-        </div>
-      </main>
+      <div>
+        <FoodLog />
+      </div>
     </HydrateClient>
   );
 }

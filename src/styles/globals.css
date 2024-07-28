@@ -1,3 +1,15 @@
 @tailwind base;
+
+body {
+  background: theme("colors.gray.100");
+}
+
+.btn {
+  background-color: theme("colors.purple.400");
+  color: white;
+  padding-block: 0.5rem;
+  padding-inline: 1rem;
+}
+
 @tailwind components;
 @tailwind utilities;
