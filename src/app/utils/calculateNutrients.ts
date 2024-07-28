@@ -23,7 +23,13 @@ export const calculateNutrients = (log: FoodLogWithFood): NutrientsOverview => {
     };
   }
 
-  throw new Error("only grams are supported");
+  console.warn("Unknown unit", log.unit);
+  return {
+    carbs: 0,
+    protein: 0,
+    fat: 0,
+    kcals: 0,
+  };
 };
 
 export const sumNutrientsForFoods = (
