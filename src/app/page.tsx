@@ -1,37 +1,56 @@
-import Link from "next/link";
-
-import { LatestPost } from "~/app/_components/post";
+import { $Enums } from "@prisma/client";
 import { getServerAuthSession } from "~/server/auth";
-import { api, HydrateClient } from "~/trpc/server";
-import { getFoodLogs } from "./queries";
+import { HydrateClient } from "~/trpc/server";
+import { DayFoodLog, getFoodLogsByDays } from "./queries";
 
-const DayOverview = ({
-  eaten,
-  goal = 2000,
-}: {
-  eaten: number;
-  goal?: number;
-}) => {
-  const left = goal - eaten;
+const shortDate = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 
+const IntakeProgress = ({ eaten, goal }: { eaten: number; goal: number }) => {
   const progress = eaten / goal;
   const isOver = progress > 1;
+  const left = goal - eaten;
 
   return (
-    <div className="rounded bg-white p-4">
-      <div className="flex justify-between">
-        <h3 className="text-sm font-medium">Today - Weds, June 20</h3>
-        <small className="text-xs">{goal} calories</small>
-      </div>
+    <div>
       <progress
         value={progress}
-        className="progress-unfilled:bg-gray-100 progress-filled:bg-green-400 data-[over=true]:progress-filled:bg-red-400 h-2 w-full"
+        className="h-2 w-full progress-unfilled:bg-gray-100 progress-filled:bg-green-400 data-[over=true]:progress-filled:bg-red-400"
         data-over={isOver}
       />
       <p className="flex justify-between font-medium">
         <span>{eaten} eaten</span>
         {isOver ? <span>{Math.abs(left)} over</span> : <span>{left} left</span>}
       </p>
+    </div>
+  );
+};
+
+const DayOverview = ({
+  date,
+  eaten,
+  goal = 2000,
+}: {
+  date: Date;
+  eaten: number;
+  goal?: number;
+}) => {
+  const isToday = new Date().toDateString() === date.toDateString();
+
+  return (
+    <div className="rounded bg-white p-4">
+      <div className="flex justify-between">
+        <h3 className="text-sm font-medium">
+          {isToday && "Today - "}
+          {shortDate(date)}
+        </h3>
+        <small className="text-xs">{goal} calories</small>
+      </div>
+      <IntakeProgress eaten={eaten} goal={goal} />
       <div className="flex justify-between text-xs text-gray-500">
         <ul className="flex gap-2">
           <li>40g protein</li>
@@ -44,38 +63,59 @@ const DayOverview = ({
   );
 };
 
-const DayItems = () => {
+const DayItems = ({ foods }: { foods: DayFoodLog["foods"] }) => {
+  const grouped = foods.reduce(
+    (acc, food) => {
+      acc[food.group] ??= [];
+      acc[food.group].push(food);
+      return acc;
+    },
+    {} as Record<$Enums.LogTimingGroup, DayFoodLog["foods"]>,
+  );
+
   return (
-    <ol>
-      <li>Chicken</li>
+    <ol className="divide-y-4">
+      {Object.entries(grouped).map(([group, foods]) => (
+        <li key={group}>
+          <h4 className="py-2 text-sm font-medium">{group}</h4>
+          <ul className="rounded bg-white">
+            {foods.map((food) => (
+              <li key={food.id} className="border-b p-2 last:border-0">
+                <h4 className="font-medium">{food.food.product_name}</h4>
+                <p className="text-sm text-gray-500">
+                  {food.servings} {food.unit}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))}
     </ol>
   );
 };
 
-const DayLog = ({ eaten }: { eaten: number }) => {
-  return (
-    <div>
-      <DayOverview eaten={eaten} />
-      <DayItems />
-    </div>
-  );
-};
-
 const FoodLog = async () => {
-  const logs = await getFoodLogs();
+  const daysAgo = 3;
+  const startDate = new Date(
+    new Date().setDate(new Date().getDate() - daysAgo),
+  );
+  const endDate = new Date();
+
+  const logs = await getFoodLogsByDays({
+    startDate,
+    endDate: endDate,
+  });
 
   return (
     <div className="container">
       <ol className="grid grid-cols-3 gap-4">
-        <li>
-          <DayLog eaten={100} />
-        </li>
-        <li>
-          <DayLog eaten={1000} />
-        </li>
-        <li>
-          <DayLog eaten={2300} />
-        </li>
+        {logs.map((daylog) => (
+          <li key={daylog.date.toString()}>
+            <DayOverview date={daylog.date} eaten={0} />
+
+            <DayItems foods={daylog.foods} />
+          </li>
+        ))}
       </ol>
     </div>
   );
