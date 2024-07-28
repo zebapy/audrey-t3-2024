@@ -76,6 +76,8 @@ model FoodLog {
 //   @@map("recipe_ingredients")
 // }
 
+// model ExcerciseLog {}
+
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 model openfoodfacts {
   code                                                  BigInt

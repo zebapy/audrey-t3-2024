@@ -1,7 +1,7 @@
 import { $Enums } from "@prisma/client";
 import { getServerAuthSession } from "~/server/auth";
 import { HydrateClient } from "~/trpc/server";
-import { DayFoodLog, getFoodLogsByDays } from "./queries";
+import { DayFoodLog, getFoodLogsByDays, sumNutrientsForFoods } from "./queries";
 
 const shortDate = (date: Date) =>
   date.toLocaleDateString("en-US", {
@@ -30,16 +30,32 @@ const IntakeProgress = ({ eaten, goal }: { eaten: number; goal: number }) => {
   );
 };
 
+const NutrientBar = ({ logs }: { logs: DayFoodLog["foods"] }) => {
+  const sums = sumNutrientsForFoods(logs);
+
+  return (
+    <ul className="flex gap-2">
+      <li>{sums.kcals} kcals</li>
+      <li>{sums.protein}g protein</li>
+      <li>{sums.carbs} carbs</li>
+      <li>{sums.fat}g fat</li>
+    </ul>
+  );
+};
+
 const DayOverview = ({
   date,
-  eaten,
+  foods,
   goal = 2000,
 }: {
   date: Date;
-  eaten: number;
+  foods: DayFoodLog["foods"];
   goal?: number;
 }) => {
   const isToday = new Date().toDateString() === date.toDateString();
+
+  const sums = sumNutrientsForFoods(foods);
+  const eaten = sums.kcals;
 
   return (
     <div className="rounded bg-white p-4">
@@ -52,11 +68,7 @@ const DayOverview = ({
       </div>
       <IntakeProgress eaten={eaten} goal={goal} />
       <div className="flex justify-between text-xs text-gray-500">
-        <ul className="flex gap-2">
-          <li>40g protein</li>
-          <li>20g fat</li>
-          <li>20g carbs</li>
-        </ul>
+        <NutrientBar logs={foods} />
         <span>300 burned</span>
       </div>
     </div>
@@ -77,7 +89,12 @@ const DayItems = ({ foods }: { foods: DayFoodLog["foods"] }) => {
     <ol className="divide-y-4">
       {Object.entries(grouped).map(([group, foods]) => (
         <li key={group}>
-          <h4 className="py-2 text-sm font-medium">{group}</h4>
+          <div className="border-b-2 border-gray-300 bg-white p-2 text-gray-800">
+            <h4 className="mb-2 text-sm font-semibold">{group}</h4>
+            <div className="text-xs">
+              <NutrientBar logs={foods} />
+            </div>
+          </div>
           <ul className="rounded bg-white">
             {foods.map((food) => (
               <li key={food.id} className="border-b p-2 last:border-0">
@@ -111,8 +128,8 @@ const FoodLog = async () => {
       <ol className="grid grid-cols-3 gap-4">
         {logs.map((daylog) => (
           <li key={daylog.date.toString()}>
-            <DayOverview date={daylog.date} eaten={0} />
-
+            <DayOverview date={daylog.date} foods={daylog.foods} />
+            <div className="my-4"></div>
             <DayItems foods={daylog.foods} />
           </li>
         ))}
