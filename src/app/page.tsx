@@ -5,6 +5,7 @@ import { DayFoodLog, getFoodLogsByDays } from "./queries";
 import Link from "next/link";
 import { FoodLogItemEditor } from "./FoodLogItemEditor";
 import { sumNutrientsForFoods } from "./utils/calculateNutrients";
+import { FoodLogItem } from "./FoodLogItem";
 
 const shortDate = (date: Date) =>
   date.toLocaleDateString("en-US", {
@@ -78,19 +79,6 @@ const DayOverview = ({
   );
 };
 
-const FoodLogItem = ({ log }: { log: DayFoodLog["foods"][0] }) => {
-  return (
-    <Link href={`/?edit=${log.id}`}>
-      <div className="p-2">
-        <h4 className="font-medium">{log.food.product_name}</h4>
-        <p className="text-sm text-gray-500">
-          {log.servings} {log.unit}
-        </p>
-      </div>
-    </Link>
-  );
-};
-
 const GroupedFoodItems = ({
   foods,
   editId,
@@ -118,13 +106,9 @@ const GroupedFoodItems = ({
             </div>
           </div>
           <ul className="rounded bg-white">
-            {foodLogs.map((food) => (
-              <li key={food.id} className="border-b last:border-0">
-                {editId === food.id ? (
-                  <FoodLogItemEditor log={food} />
-                ) : (
-                  <FoodLogItem log={food} />
-                )}
+            {foodLogs.map((log) => (
+              <li key={log.id} className="border-b last:border-0">
+                <FoodLogItem editing={log.id === editId} log={log} />
               </li>
             ))}
           </ul>

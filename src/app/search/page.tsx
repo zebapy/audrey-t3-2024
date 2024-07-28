@@ -6,6 +6,8 @@ export default async function SearchPageTerm(props: {
 }) {
   const food = await searchFood(props.searchParams);
 
+  // TODO: show recent used items
+
   return (
     <div className="p-4">
       <form action="/search" method="get" className="mb-4 flex w-full gap-2">

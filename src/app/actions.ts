@@ -54,3 +54,9 @@ export const updateFoodLog = async (prev: UpdateFoodLogState, fd: FormData) => {
 
   return { message: "Updated" };
 };
+
+export const deleteFoodLog = async (id: string) => {
+  // FIXME: check if user is allowed to delete this log
+  await db.foodLog.delete({ where: { id } });
+  revalidatePath("/");
+};
