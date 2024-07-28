@@ -3,9 +3,9 @@ import { getServerAuthSession } from "~/server/auth";
 import { HydrateClient } from "~/trpc/server";
 import { type DayFoodLog, getFoodLogsByDays } from "./queries";
 import Link from "next/link";
-import { FoodLogItemEditor } from "./FoodLogItemEditor";
+import { FoodLogItemEditor } from "./_components/FoodLogItemEditor";
 import { sumNutrientsForFoods } from "./utils/calculateNutrients";
-import { FoodLogItem } from "./FoodLogItem";
+import { FoodLogItem } from "./_components/FoodLogItem";
 
 const shortDate = (date: Date) =>
   date.toLocaleDateString("en-US", {

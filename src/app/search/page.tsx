@@ -1,5 +1,5 @@
 import { type SearchParams, searchFood } from "../queries";
-import { LoggableSearchResult } from "./LoggableSearchResult";
+import { LoggableSearchResult } from "../_components/LoggableSearchResult";
 
 export default async function SearchPageTerm(props: {
   searchParams: SearchParams;

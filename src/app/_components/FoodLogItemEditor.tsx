@@ -1,9 +1,9 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import { updateFoodLog } from "./actions";
-import { type DayFoodLog } from "./queries";
-import { calculateNutrients } from "./utils/calculateNutrients";
+import { updateFoodLog } from "../actions";
+import { type DayFoodLog } from "../queries";
+import { calculateNutrients } from "../utils/calculateNutrients";
 import { PendingSubmitButton } from "./SubmitButton";
 import Link from "next/link";
 import { useState } from "react";
