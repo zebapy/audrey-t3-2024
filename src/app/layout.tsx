@@ -6,7 +6,6 @@ import { type Metadata } from "next";
 import { TRPCReactProvider } from "~/trpc/react";
 import Link from "next/link";
 import { PottedPlant } from "@phosphor-icons/react/dist/ssr";
-import { BarcodeButton } from "./_components/BarcodeButton";
 
 export const metadata: Metadata = {
   title: "Audrey",
